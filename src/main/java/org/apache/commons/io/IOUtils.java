@@ -739,7 +739,7 @@ public class IOUtils {
      *
      * @param closeable The resource to close, may be null.
      * @param consumer  Consume the IOException thrown by {@link Closeable#close()}.
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException As thrown by the consumer.
      * @since 2.7
      */
     public static void close(final Closeable closeable, final IOConsumer<IOException> consumer) throws IOException {
