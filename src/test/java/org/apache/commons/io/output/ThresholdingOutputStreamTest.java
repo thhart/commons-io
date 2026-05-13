@@ -209,26 +209,6 @@ class ThresholdingOutputStreamTest {
     }
 
     @Test
-    void testThresholdReachedRetriedAfterException() throws IOException {
-        final int threshold = 1;
-        final AtomicInteger counter = new AtomicInteger();
-        try (ThresholdingOutputStream out = new ThresholdingOutputStream(threshold, tos -> {
-            if (counter.incrementAndGet() == 1) {
-                throw new IOException("Threshold reached.");
-            }
-        }, os -> new ByteArrayOutputStream(4))) {
-            assertThresholdingInitialState(out, threshold, 0);
-            out.write('a');
-            assertFalse(out.isThresholdExceeded());
-            assertThrows(IOException.class, () -> out.write('a'));
-            assertFalse(out.isThresholdExceeded());
-            out.write('a');
-            assertEquals(2, counter.get());
-            assertTrue(out.isThresholdExceeded());
-        }
-    }
-
-    @Test
     void testThresholdIOConsumerUncheckedException() throws IOException {
         final int threshold = 1;
         try (ThresholdingOutputStream out = new ThresholdingOutputStream(threshold, os -> {
@@ -263,6 +243,26 @@ class ThresholdingOutputStreamTest {
             assertTrue(reached.get());
             assertTrue(out.isThresholdExceeded());
             assertInstanceOf(NullOutputStream.class, out.getOutputStream());
+            assertTrue(out.isThresholdExceeded());
+        }
+    }
+
+    @Test
+    void testThresholdReachedRetriedAfterException() throws IOException {
+        final int threshold = 1;
+        final AtomicInteger counter = new AtomicInteger();
+        try (ThresholdingOutputStream out = new ThresholdingOutputStream(threshold, tos -> {
+            if (counter.incrementAndGet() == 1) {
+                throw new IOException("Threshold reached.");
+            }
+        }, os -> new ByteArrayOutputStream(4))) {
+            assertThresholdingInitialState(out, threshold, 0);
+            out.write('a');
+            assertFalse(out.isThresholdExceeded());
+            assertThrows(IOException.class, () -> out.write('a'));
+            assertFalse(out.isThresholdExceeded());
+            out.write('a');
+            assertEquals(2, counter.get());
             assertTrue(out.isThresholdExceeded());
         }
     }
